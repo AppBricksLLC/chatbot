@@ -1,7 +1,7 @@
 // ImageUploadForAi.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function ImageUploadForAi() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -19,13 +19,11 @@ export default function ImageUploadForAi() {
       return;
     }
 
-    // BUG: This object URL is never revoked.
-    // If the user uploads multiple images, the browser keeps the old blobs in memory.
     const previewUrl = URL.createObjectURL(file);
 
     setImageUrl(previewUrl);
   }
-  useEffect(() => {\n    return () => {\n      if (imageUrl) {\n        URL.revokeObjectURL(imageUrl);\n      }\n    };\n  }, [imageUrl]);
+
   async function analyzeImage() {
     if (!imageUrl) {
       alert("Upload an image first.");
