@@ -1,7 +1,7 @@
 // ImageUploadForAi.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function ImageUploadForAi() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -25,7 +25,7 @@ export default function ImageUploadForAi() {
 
     setImageUrl(previewUrl);
   }
-
+  useEffect(() => {\n    return () => {\n      if (imageUrl) {\n        URL.revokeObjectURL(imageUrl);\n      }\n    };\n  }, [imageUrl]);
   async function analyzeImage() {
     if (!imageUrl) {
       alert("Upload an image first.");
