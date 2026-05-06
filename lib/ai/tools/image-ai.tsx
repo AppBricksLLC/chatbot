@@ -1,7 +1,7 @@
 // ImageUploadForAi.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ImageUploadForAi() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -19,10 +19,19 @@ export default function ImageUploadForAi() {
       return;
     }
 
+    if (imageUrl) {
+      URL.revokeObjectURL(imageUrl);
+    }
+
     const previewUrl = URL.createObjectURL(file);
 
     setImageUrl(previewUrl);
   }
+  useEffect(() => {
+    return () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+    };
+  }, [imageUrl]);
 
   async function analyzeImage() {
     if (!imageUrl) {
