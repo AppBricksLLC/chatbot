@@ -103,6 +103,8 @@ export default function AiInferenceWorkbench() {
 
     setStatus("running");
 
+    setResult(null);
+
     simulateInference(provider, selectedTemplate, input)
       .then((nextResult) => {
         setResult(nextResult);
@@ -111,7 +113,7 @@ export default function AiInferenceWorkbench() {
       .catch(() => {
         setStatus("failed");
       });
-  }, [autoRun, provider, input]);
+  }, [autoRun, provider, input, templateId]);
 
   return (
     <main className="min-h-screen bg-zinc-950 p-8 text-zinc-100">
