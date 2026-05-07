@@ -205,7 +205,7 @@ export default function AICodeReviewDemo() {
             <p>Confidence: {result.confidence}</p>
 
           
-            <div dangerouslySetInnerHTML={{ __html: result.summary }} />
+            <p>{result.summary}</p>
 
             <ul>
               
