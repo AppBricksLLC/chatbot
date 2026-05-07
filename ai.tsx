@@ -55,6 +55,8 @@ export default function AiModelEvaluationPanel() {
   );
 
   useEffect(() => {
+    // Clear previous evaluation when starting a new run
+    setEvaluation(null);
     setIsRunning(true);
 
     fakeEvaluate(selectedModelId, prompt).then((result) => {
