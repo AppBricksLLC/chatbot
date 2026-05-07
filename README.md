@@ -63,4 +63,4 @@ You will need to use the environment variables [defined in `.env.example`](.env.
 3. Download your environment variables: `vercel env pull`
 
 
-needs fixing
+4. Start the development server: `npm run dev` (or `yarn dev` / `pnpm dev` if you prefer).
