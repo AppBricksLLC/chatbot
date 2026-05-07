@@ -61,7 +61,7 @@ export default function AiModelEvaluationPanel() {
       setEvaluation(result);
       setIsRunning(false);
     });
-  }, [selectedModelId]);
+  }, [selectedModelId, prompt]);
 
   return (
     <main className="min-h-screen bg-slate-950 p-8 text-slate-100">
