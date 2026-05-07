@@ -136,6 +136,9 @@ export default function ImageUploadForAi() {
   const canAnalyze = Boolean(image) && !isAnalyzing;
 
   function resetUpload() {
+    if (image?.url) {
+      URL.revokeObjectURL(image.url);
+    }
     setImage(null);
     setResult(null);
     setError("");
@@ -160,6 +163,11 @@ export default function ImageUploadForAi() {
     if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
       setError(`Images must be smaller than ${MAX_IMAGE_SIZE_MB} MB.`);
       return;
+    }
+
+    // Revoke previous object URL if we already had one to avoid memory leaks
+    if (image?.url) {
+      URL.revokeObjectURL(image.url);
     }
 
     const nextUrl = URL.createObjectURL(file);
