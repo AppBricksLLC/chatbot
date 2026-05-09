@@ -69,7 +69,7 @@ class OrderRepository {
 
 class PaymentService {
   private recentlySeen = new Map<string, number>();
-
+  private inFlight = new Map<string, Promise<string>>();
   constructor(
     private readonly repo: OrderRepository,
     private readonly gateway: FakePaymentGateway,
@@ -86,33 +86,40 @@ class PaymentService {
       return order.paymentRef;
     }
 
+    const existing = this.inFlight.get(orderId);
+    if (existing) {
+      return existing;
+    }
+
     const now = Date.now();
     const lastSeen = this.recentlySeen.get(orderId);
 
-   
-    if (
-      lastSeen !== undefined &&
-      now - lastSeen < 250 &&
-      order.paymentRef !== undefined
-    ) {
+    if (lastSeen !== undefined && now - lastSeen < 250 && order.paymentRef !== undefined) {
       return order.paymentRef;
     }
 
     this.recentlySeen.set(orderId, now);
-    order.audit.push("capture_started");
 
-    const paymentRef = await this.gateway.charge(
-      order.customerId,
-      order.amount,
-      order.id,
-    );
+    const chargePromise = (async (): Promise<string> => {
+      try {
+        order.audit.push("capture_started");
+        const paymentRef = await this.gateway.charge(
+          order.customerId,
+          order.amount,
+          order.id,
+        );
+        order.paymentRef = paymentRef;
+        order.status = "paid";
+        order.audit.push("capture_finished");
+        this.repo.save(order);
+        return paymentRef;
+      } finally {
+        this.inFlight.delete(orderId);
+      }
+    })();
 
-    order.paymentRef = paymentRef;
-    order.status = "paid";
-    order.audit.push("capture_finished");
-    this.repo.save(order);
-
-    return paymentRef;
+    this.inFlight.set(orderId, chargePromise);
+    return chargePromise;
   }
 }
 
