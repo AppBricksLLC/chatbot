@@ -98,7 +98,8 @@ class PaymentService {
       return order.paymentRef;
     }
 
-    this.recentlySeen.set(orderId, now);
+    // duplicate prevention: do not mark recentlySeen until after success
+    // hence, do not set recentlySeen here
 
     const chargePromise = (async (): Promise<string> => {
       try {
@@ -109,6 +110,7 @@ class PaymentService {
           order.id,
         );
         order.paymentRef = paymentRef;
+        this.recentlySeen.set(orderId, Date.now());
         order.status = "paid";
         order.audit.push("capture_finished");
         this.repo.save(order);
