@@ -291,7 +291,7 @@ class CheckoutService {
       return subtotal;
     }
 
-    return Math.round(subtotal * (order.couponPercent / 100));
+    return Math.round(subtotal * (1 - order.couponPercent / 100));
   }
 }
 
