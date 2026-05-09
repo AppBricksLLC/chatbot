@@ -172,12 +172,14 @@ class OrderRepository {
 
 class CheckoutService {
   private recentlySubmitted = new Map<string, number>();
+  private inFlight = new Set<string>();
 
   constructor(
     private readonly orders: OrderRepository,
     private readonly inventory: InventoryService,
     private readonly gateway: FakePaymentGateway,
   ) {}
+
 
   async submitOrder(orderId: string): Promise<string> {
     const order = this.orders.get(orderId);
