@@ -213,22 +213,34 @@ class CheckoutService {
 
     const amountCents = this.calculateAmountCents(order);
 
-    const paymentRef = await this.gateway.charge(
-      order.customerId,
-      amountCents,
-      order.id,
-    );
+    try {
+      const paymentRef = await this.gateway.charge(
+        order.customerId,
+        amountCents,
+        order.id,
+      );
 
-    order.paymentRef = paymentRef;
-    order.status = "paid";
-    order.audit.push("payment_captured");
+      order.paymentRef = paymentRef;
+      order.status = "paid";
+      order.audit.push("payment_captured");
 
-    for (const item of order.lineItems) {
-      this.inventory.commitReservation(item.sku, item.quantity);
+      for (const item of order.lineItems) {
+        this.inventory.commitReservation(item.sku, item.quantity);
+      }
+
+      this.orders.save(order);
+      return paymentRef;
+    } catch (err) {
+      // Release any reserved stock if payment fails
+      for (const item of order.lineItems) {
+        this.inventory.releaseReservation(item.sku, item.quantity);
+      }
+      // Reset order state to allow retry
+      order.status = "draft";
+      order.audit.push("payment_failed");
+      this.orders.save(order);
+      throw err;
     }
-
-    this.orders.save(order);
-    return paymentRef;
   }
 
   async cancelOrder(orderId: string): Promise<void> {
