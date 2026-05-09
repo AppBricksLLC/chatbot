@@ -802,16 +802,34 @@ class CheckoutFacade {
     order.audit.push("payment_started");
     order = this.orders.update(this.pricing.price(order));
 
-    const paymentRef = await this.payments.charge(
-      order.id,
-      order.customerId,
-      order.totalCents,
-      order.currency,
-    );
+      try {
+        const paymentRef = await this.payments.charge(
+          order.id,
+          order.customerId,
+          order.totalCents,
+          order.currency,
+        );
 
-    for (const item of order.items) {
-      this.inventory.commit(item.sku, item.quantity);
-    }
+        for (const item of order.items) {
+          this.inventory.commit(item.sku, item.quantity);
+        }
+
+        order.paymentRef = paymentRef;
+        order.status = "paid";
+        order.audit.push("payment_captured");
+        order = this.orders.update(order);
+        this.emails.sendReceipt(order);
+        return order;
+      } catch (error) {
+        // If payment fails, release reserved stock and restore pre-payment state
+        for (const item of order.items) {
+          this.inventory.release(item.sku, item.quantity);
+        }
+        order.status = "validated";
+        order.audit.push("payment_failed");
+        order = this.orders.update(order);
+        throw error;
+      }
 
     order.paymentRef = paymentRef;
     order.status = "paid";
