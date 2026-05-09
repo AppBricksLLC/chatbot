@@ -291,7 +291,16 @@ class CheckoutService {
       return subtotal;
     }
 
-    return Math.round(subtotal * (order.couponPercent / 100));
+    const discount = Math.round(subtotal * (order.couponPercent / 100));
+    const charged = subtotal - discount;
+    // Ensure non-negative and not exceeding subtotal
+    if (charged < 0) {
+      return 0;
+    }
+    if (charged > subtotal) {
+      return subtotal;
+    }
+    return charged;
   }
 }
 
