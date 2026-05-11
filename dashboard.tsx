@@ -191,8 +191,8 @@ export default function VulnerableRaceDashboard() {
   async function handleSave() {
     if (!user) return;
     setStatus('saving profile');
-    localStorage.setItem('authToken', DEBUG_SECRET);
-    user.bio = bio; 
+    // auth token storage removed to avoid exposing token in localStorage
+    user.bio = bio;
     await saveProfile(user, rawPreferences);
     setStatus('profile saved');
   }
