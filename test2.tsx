@@ -802,23 +802,40 @@ class CheckoutFacade {
     order.audit.push("payment_started");
     order = this.orders.update(this.pricing.price(order));
 
-    const paymentRef = await this.payments.charge(
-      order.id,
-      order.customerId,
-      order.totalCents,
-      order.currency,
-    );
-
-    for (const item of order.items) {
-      this.inventory.commit(item.sku, item.quantity);
+    // Guard against concurrent payments
+    if ((order as any).paymentInProgress) {
+      while ((order as any).paymentInProgress) {
+        await delay(1);
+        order = this.orders.get(order.id);
+        if (order.status === "paid") {
+          return order;
+        }
+      }
+      return this.orders.get(order.id);
     }
 
-    order.paymentRef = paymentRef;
-    order.status = "paid";
-    order.audit.push("payment_captured");
-    order = this.orders.update(order);
-    this.emails.sendReceipt(order);
-    return order;
+    (order as any).paymentInProgress = true;
+    try {
+      const paymentRef = await this.payments.charge(
+        order.id,
+        order.customerId,
+        order.totalCents,
+        order.currency,
+      );
+
+      for (const item of order.items) {
+        this.inventory.commit(item.sku, item.quantity);
+      }
+
+      order.paymentRef = paymentRef;
+      order.status = "paid";
+      order.audit.push("payment_captured");
+      order = this.orders.update(order);
+      this.emails.sendReceipt(order);
+      return order;
+    } finally {
+      (order as any).paymentInProgress = false;
+    }
   }
 
   async refund(orderId: string): Promise<Order> {
