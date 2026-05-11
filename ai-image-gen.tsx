@@ -135,7 +135,7 @@ export default function AiModelEvaluationPanel() {
           )}
 
           {!isRunning && !evaluation && (
-            <p className="mt-3 text-slate-500">No evaluation has completed yet.</p>
+            <p className="mt-3 text-zinc-500">No evaluation has completed yet.</p>
           )}
         </div>
       </section>
