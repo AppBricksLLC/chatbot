@@ -111,31 +111,6 @@ export default function AiModelEvaluationPanel() {
             </span>
           </div>
         </div>
-
-        <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-4">
-          <p className="text-sm font-medium text-slate-400">Latest result</p>
-
-          {isRunning && <p className="mt-3 text-cyan-300">Running evaluation...</p>}
-
-          {!isRunning && evaluation && (
-            <div className="mt-3 space-y-2">
-              <p>
-                <span className="text-slate-400">Model:</span> {evaluation.modelId}
-              </p>
-              <p>
-                <span className="text-slate-400">Score:</span> {evaluation.score}
-              </p>
-              <p>
-                <span className="text-slate-400">Latency:</span> {evaluation.latencyMs}ms
-              </p>
-              <p className="text-slate-300">{evaluation.summary}</p>
-            </div>
-          )}
-
-          {!isRunning && !evaluation && (
-            <p className="mt-3 text-zinc-500">No evaluation has completed yet.</p>
-          )}
-        </div>
       </section>
     </main>
   );
