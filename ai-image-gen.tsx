@@ -69,9 +69,7 @@ export default function AiModelEvaluationPanel() {
     <main className="min-h-screen bg-slate-950 p-8 text-slate-100">
       <section className="mx-auto max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
         <div className="mb-6">
-          <p className="text-sm font-medium uppercase tracking-wide text-cyan-300">
-            AI Evaluation Console
-          </p>
+
           <h1 className="mt-2 text-3xl font-semibold">Model comparison run</h1>
           <p className="mt-2 text-slate-400">
             Select a model, edit the prompt, and inspect the latest evaluation result.
