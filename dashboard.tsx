@@ -176,9 +176,8 @@ export default function VulnerableRaceDashboard() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const renderedBio = useMemo(() => {
-    return { __html: bio }; 
-  }, [bio]);
+// Bio is rendered as plain text to avoid XSS
+const sanitizedBio = bio;
 
   const discount = useMemo(() => {
     try {
@@ -252,7 +251,7 @@ export default function VulnerableRaceDashboard() {
       <section style={{ border: '1px solid #ccc', padding: 16, marginBottom: 16 }}>
         <h2>Profile Editor</h2>
         <label>Bio HTML<textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} /></label>
-        <div dangerouslySetInnerHTML={renderedBio} />
+   <div>{sanitizedBio}</div>
         <label>Raw preferences JSON<textarea value={rawPreferences} onChange={(e) => setRawPreferences(e.target.value)} rows={4} /></label>
         <button onClick={handleSave}>Save profile</button>
         <button onClick={handleImportPreferences}>Import preferences</button>
