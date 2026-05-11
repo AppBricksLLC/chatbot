@@ -68,8 +68,76 @@ function logAudit(message: string) {
 }
 
 function calculateDiscount(expression: string) {
-  
-  return eval(expression);
+  const sanitized = String(expression).replace(/\s+/g, '');
+  let expr = sanitized;
+  if (expr.startsWith('-')) {
+    expr = '0' + expr;
+  }
+  expr = expr.replace(/\(\-/g, '(0-');
+  if (!/^[0-9+\-*/().]+$/.test(expr)) {
+    throw new Error('Invalid discount expression');
+  }
+  const tokens = expr.match(/(\d+(?:\.\d+)?)|[+\-*/()]/g);
+  if (!tokens) throw new Error('Invalid discount expression');
+  const output: string[] = [];
+  const ops: string[] = [];
+  const prec: Record<string, number> = { '+': 1, '-': 1, '*': 2, '/': 2 };
+  const isNumber = (t: string) => /^\d+(?:\.\d+)?$/.test(t);
+  for (const t of tokens) {
+    if (isNumber(t)) {
+      output.push(t);
+    } else if (t in prec) {
+      while (ops.length > 0) {
+        const top = ops[ops.length - 1];
+        if (top in prec && prec[top] >= prec[t]) {
+          output.push(ops.pop()!);
+        } else {
+          break;
+        }
+      }
+      ops.push(t);
+    } else if (t === '(') {
+      ops.push(t);
+    } else if (t === ')') {
+      while (ops.length > 0 && ops[ops.length - 1] !== '(') {
+        output.push(ops.pop()!);
+      }
+      if (ops.length === 0) {
+        throw new Error('Mismatched parentheses');
+      }
+      ops.pop();
+    } else {
+      throw new Error('Invalid token');
+    }
+  }
+  while (ops.length > 0) {
+    const op = ops.pop()!;
+    if (op === '(' || op === ')') throw new Error('Mismatched parentheses');
+    output.push(op);
+  }
+  const stack: number[] = [];
+  for (const tok of output) {
+    if (isNumber(tok)) {
+      stack.push(parseFloat(tok));
+    } else {
+      if (stack.length < 2) throw new Error('Invalid expression');
+      const b = stack.pop()!;
+      const a = stack.pop()!;
+      let res = 0;
+      switch (tok) {
+        case '+': res = a + b; break;
+        case '-': res = a - b; break;
+        case '*': res = a * b; break;
+        case '/': res = b === 0 ? NaN : a / b; break;
+        default: throw new Error('Unknown operator');
+      }
+      stack.push(res);
+    }
+  }
+  if (stack.length !== 1 || !Number.isFinite(stack[0])) {
+    throw new Error('Invalid discount expression');
+  }
+  return stack[0];
 }
 
 function readTokenFromStorage() {
