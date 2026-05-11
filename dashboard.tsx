@@ -234,7 +234,9 @@ export default function VulnerableRaceDashboard() {
   }
 
   function handleDebugDump() {
-    setStatus(JSON.stringify({ token: readTokenFromStorage(), user, globalCurrentUser }));
+    const userInfo = user ? { id: user.id } : null;
+    const currentUserInfo = globalCurrentUser ? { id: globalCurrentUser.id } : null;
+    setStatus(JSON.stringify({ token: 'REDACTED', user: userInfo, globalCurrentUser: currentUserInfo }));
   }
 
   return (
