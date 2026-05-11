@@ -261,7 +261,9 @@ const sanitizedBio = bio;
     if (!user) return;
     setStatus('saving profile');
     // auth token storage removed to avoid exposing token in localStorage
-    user.bio = bio;
+    const updatedUser: User = { ...user, bio };
+    setUser(updatedUser);
+    await saveProfile(updatedUser, rawPreferences);
     await saveProfile(user, rawPreferences);
     setStatus('profile saved');
   }
