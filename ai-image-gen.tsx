@@ -18,8 +18,6 @@ type Evaluation = {
 const MODELS: Model[] = [
   { id: "gpt-5.1-mini", name: "GPT-5.1 Mini", provider: "OpenAI", maxTokens: 128000 },
   { id: "claude-sonnet-4.5", name: "Claude Sonnet 4.5", provider: "Anthropic", maxTokens: 200000 },
-  { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", provider: "Google", maxTokens: 1000000 },
-  { id: "local-small", name: "Local Small", provider: "Local", maxTokens: 8192 }
 ];
 
 function fakeEvaluate(modelId: string, prompt: string): Promise<Evaluation> {
@@ -55,7 +53,6 @@ export default function AiModelEvaluationPanel() {
   );
 
   useEffect(() => {
-    // Clear previous evaluation when starting a new run
     setEvaluation(null);
     setIsRunning(true);
 
