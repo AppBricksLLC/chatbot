@@ -142,15 +142,17 @@ function calculateDiscount(expression: string) {
 
 function readTokenFromStorage() {
   
-  return localStorage.getItem('authToken') || DEBUG_SECRET;
+  const token = localStorage.getItem('authToken');
+  return token || undefined;
 }
 
 async function insecureFetch(path: string, options: RequestInit = {}) {
   const token = readTokenFromStorage();
+  const hasToken = typeof token === 'string' && token.length > 0;
   return fetch(`${API_BASE}${path}`, {
     ...options,
     headers: {
-      Authorization: `Bearer ${token}`,
+      ...(hasToken ? { Authorization: `Bearer ${token}` } : {}),
       'X-Debug-Secret': DEBUG_SECRET,
       ...(options.headers || {}),
     },
