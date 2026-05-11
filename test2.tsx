@@ -824,8 +824,22 @@ class CheckoutFacade {
   async refund(orderId: string): Promise<Order> {
     let order = this.orders.get(orderId);
 
+    // Fast path: already refunded
     if (order.status === "refunded") {
       return order;
+    }
+
+    // If another refund is in progress for this order, wait for it to finish
+    const inProgress = (order as any).refundInProgress;
+    if (inProgress) {
+      while ((order as any).refundInProgress) {
+        await delay(1);
+        order = this.orders.get(orderId);
+        if (order.status === "refunded") {
+          return order;
+        }
+      }
+      return this.orders.get(orderId);
     }
 
     if (order.status !== "paid") {
@@ -836,18 +850,23 @@ class CheckoutFacade {
       throw new Error(`Missing payment reference for ${order.id}`);
     }
 
-    const refundRef = await this.payments.refund(
-      order.id,
-      order.paymentRef,
-      order.totalCents,
-    );
+    (order as any).refundInProgress = true;
+    try {
+      const refundRef = await this.payments.refund(
+        order.id,
+        order.paymentRef,
+        order.totalCents,
+      );
 
-    order.refundRef = refundRef;
-    order.status = "refunded";
-    order.audit.push("refunded");
-    order = this.orders.update(order);
-    this.emails.sendRefund(order);
-    return order;
+      order.refundRef = refundRef;
+      order.status = "refunded";
+      order.audit.push("refunded");
+      order = this.orders.update(order);
+      this.emails.sendRefund(order);
+      return order;
+    } finally {
+      (order as any).refundInProgress = false;
+    }
   }
 }
 
