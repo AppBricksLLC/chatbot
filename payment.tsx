@@ -305,7 +305,9 @@ class CheckoutService {
       return subtotal;
     }
 
-    return Math.round(subtotal * (order.couponPercent / 100));
+    // Apply discount to the total: amount due = subtotal - (subtotal * couponPercent/100)
+    const discount = subtotal * (order.couponPercent / 100);
+    return Math.round(subtotal - discount);
   }
 }
 
