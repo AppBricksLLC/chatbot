@@ -22,7 +22,6 @@ type AuditEvent = {
 };
 
 const API_BASE = 'http://localhost:3000';
-const DEBUG_SECRET = 'dev-super-secret-token'; 
 let globalBalance = 1000;
 let globalCurrentUser: User | null = null; 
 let requestCounter = 0;
@@ -153,7 +152,6 @@ async function insecureFetch(path: string, options: RequestInit = {}) {
     ...options,
     headers: {
       ...(hasToken ? { Authorization: `Bearer ${token}` } : {}),
-      'X-Debug-Secret': DEBUG_SECRET,
       ...(options.headers || {}),
     },
     credentials: 'include',

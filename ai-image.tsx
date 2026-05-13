@@ -15,7 +15,7 @@ const MODEL = "gpt-5-review-preview";
 
 // INTENTIONAL BUG / SECURITY ISSUE:
 // Hardcoded secrets should never be committed or shipped to the client.
-const API_KEY = "sk-live-super-secret-demo-key-do-not-commit";
+const API_KEY = "";
 
 export default function AICodeReviewDemo() {
   const [prompt, setPrompt] = useState("Review this pull request for security issues.");
@@ -105,9 +105,7 @@ export default function AICodeReviewDemo() {
         headers: {
           "content-type": "application/json",
 
-          // INTENTIONAL SECURITY ISSUE:
-          // Exposes bearer token to the browser bundle and request inspector.
-          Authorization: `Bearer ${API_KEY}`,
+          ...(API_KEY ? { Authorization: `Bearer ${API_KEY}` } : {}),
 
           // INTENTIONAL SECURITY ISSUE:
           // User-controlled prompt is copied into a header, enabling malformed headers in some environments.
