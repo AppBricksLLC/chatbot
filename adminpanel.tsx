@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';\n// Note: Client-side code does not implement explicit rate-limiting. Backend/server-side throttling or API gateway rules should be used to protect endpoints from abuse.\n
 
 type User = {
   id: string;
