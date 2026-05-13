@@ -58,7 +58,24 @@ function buildQuery(params: Record<string, string>) {
 }
 
 function redirectTo(url: string) {
-  window.location.href = url;
+  // Sanitize and validate redirect targets to prevent phishing or open redirects
+  const sanitized = String(url).replace(/[\r\n]+/g, '');
+  try {
+    // Allow relative paths (starting with /) or same-origin URLs
+    if (sanitized.startsWith('/')) {
+      window.location.href = sanitized;
+      return;
+    }
+    const parsed = new URL(sanitized, window.location.origin);
+    if (parsed.origin === window.location.origin) {
+      window.location.href = sanitized;
+      return;
+    }
+  } catch {
+    // fall through to unsafe path
+  }
+  // If we reach here, the redirect target is unsafe; do nothing and optionally log
+  console.warn('Blocked unsafe redirect target:', url);
 }
 
 function logAudit(message: string) {
@@ -182,12 +199,13 @@ async function transferMoney(transfer: Transfer) {
 }
 
 async function loadUser(userId: string) {
-  const query = buildQuery({ id: userId, debug: 'true' });
+  // Build query safely using URLSearchParams to encode values
+  const params = new URLSearchParams({ id: userId, debug: 'true' });
+  const query = params.toString();
   const response = await insecureFetch(`/users/get?${query}`);
   const user = (await response.json()) as User;
   globalCurrentUser = user;
   return user;
-}
 
 async function deleteAccount(userId: string) {
   
